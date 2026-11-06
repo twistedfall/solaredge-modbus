@@ -12,10 +12,12 @@
 //!
 //! An optional `discover` feature is available to find the inverters on the local network using mDNS.
 //!
-//! ```
+//! ```no_run
+//! # #[cfg(feature = "discover")]
 //! use solaredge_modbus::{TcpClient, discover_with_mdns};
 //! use std::time::Duration;
 //!
+//! # #[cfg(feature = "discover")]
 //! async fn run() -> Result<(), Box<dyn std::error::Error>> {
 //!    let hosts = discover_with_mdns(Duration::from_secs(3), 1).await?;
 //!    let host_info = hosts.into_iter().next().ok_or("No host found")?;
@@ -25,10 +27,16 @@
 //! }
 //! ```
 
+pub use der_ac::DerAcClient;
 pub use error::Error;
+pub use meter::MeterClient;
+pub use slot::{Slot, SlotNumber};
 pub use tcp_client::TcpClient;
 
+pub mod der_ac;
 mod error;
+pub mod meter;
+pub mod slot;
 pub mod tcp_client;
 #[cfg(feature = "discover")]
 pub use discover::{SolaredgeHostInfo, discover_with_mdns};

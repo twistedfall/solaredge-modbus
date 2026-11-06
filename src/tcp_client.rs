@@ -14,10 +14,22 @@ impl TcpClient {
 				tcp::Config {
 					tcp_port: port,
 					modbus_uid: device_id,
+					tcp_connect_timeout: Some(crate::slot::TCP_TIMEOUT),
+					tcp_read_timeout: Some(crate::slot::TCP_TIMEOUT),
+					tcp_write_timeout: Some(crate::slot::TCP_TIMEOUT),
 					..Default::default()
 				},
 			)?,
 		})
+	}
+
+	/// Consume this client and return the underlying transport.
+	///
+	/// Use this to pass the existing TCP session to [`Slot::open_on_transport`], avoiding the
+	/// close/reopen cycle that causes SolarEdge inverters to fail due to their single-session
+	/// limitation.
+	pub fn into_transport(self) -> tcp::Transport {
+		self.client
 	}
 
 	#[cfg(feature = "discover")]
@@ -217,21 +229,30 @@ impl TcpClient {
 		register: R,
 		scale_register: RS,
 	) -> modbus::Result<(Vec<u16>, i16)> {
-		if register.address() + register.size() == scale_register.address() {
-			let mut combined = self
-				.client
-				.read_holding_registers(register.address(), register.size() + scale_register.size())?;
-			let scale = combined.pop().unwrap();
-			Ok((combined, scale as i16))
-		} else if scale_register.address() + scale_register.size() == register.address() {
-			let mut combined = self
-				.client
-				.read_holding_registers(scale_register.address(), scale_register.size() + register.size())?;
-			let scale = combined.remove(0);
-			Ok((combined, scale as i16))
-		} else {
-			Ok((self.read_register(register)?, self.read_register(scale_register)?.i16()))
-		}
+		read_scaled(&mut self.client, register.address(), register.size(), scale_register.address())
+	}
+}
+
+/// Read a data register and its scale-factor register, combining them into a single Modbus
+/// request when the two registers are contiguous in the address space.
+pub(crate) fn read_scaled(
+	client: &mut tcp::Transport,
+	reg_addr: u16,
+	reg_size: u16,
+	sf_addr: u16,
+) -> modbus::Result<(Vec<u16>, i16)> {
+	if reg_addr + reg_size == sf_addr {
+		let mut combined = client.read_holding_registers(reg_addr, reg_size + 1)?;
+		let sf = combined.pop().unwrap() as i16;
+		Ok((combined, sf))
+	} else if sf_addr + 1 == reg_addr {
+		let mut combined = client.read_holding_registers(sf_addr, 1 + reg_size)?;
+		let sf = combined.remove(0) as i16;
+		Ok((combined, sf))
+	} else {
+		let data = client.read_holding_registers(reg_addr, reg_size)?;
+		let sf = client.read_holding_registers(sf_addr, 1)?[0] as i16;
+		Ok((data, sf))
 	}
 }
 
@@ -474,7 +495,7 @@ impl RegisterResponse for Vec<u16> {
 	}
 }
 
-trait Scaled {
+pub(crate) trait Scaled {
 	fn scaled(self, scale: i16) -> f64;
 }
 
