@@ -11,8 +11,15 @@
 //! [this guide](https://github.com/binsentsu/home-assistant-solaredge-modbus#enabling-modbus-tcp-on-solaredge-inverter).
 //!
 //! An optional `discover` feature is available to find the inverters on the local network using mDNS.
+//! Enable it to use the following example:
+//!
+//! ```sh
+//! cargo add solaredge-modbus --features discover
+//! ```
 //!
 //! ```
+//! # #[cfg(feature = "discover")]
+//! # {
 //! use solaredge_modbus::{TcpClient, discover_with_mdns};
 //! use std::time::Duration;
 //!
@@ -23,6 +30,7 @@
 //!    let lifetime_energy = client.energy_wh()?;
 //!    Ok(())
 //! }
+//! # }
 //! ```
 
 pub use error::Error;

@@ -1,3 +1,5 @@
+#![cfg(feature = "discover")]
+
 use std::time::Duration;
 
 use solaredge_modbus::{TcpClient, discover_with_mdns};
