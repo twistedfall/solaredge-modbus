@@ -21,8 +21,19 @@ impl TcpClient {
 	}
 
 	#[cfg(feature = "discover")]
+	/// Connects using the discovered addresses, trying alternatives on failure
 	pub fn new_from_host_info(host_info: &crate::SolaredgeHostInfo) -> Result<Self, Error> {
-		Self::new(&host_info.address(), host_info.port, host_info.modbus_id)
+		let mut last_error = None;
+		for address in &host_info.addresses {
+			match Self::new(&address.to_string(), host_info.port, host_info.modbus_id) {
+				Ok(client) => return Ok(client),
+				Err(error) => last_error = Some(error),
+			}
+		}
+		match last_error {
+			Some(error) => Err(error),
+			None => Self::new(&host_info.hostname, host_info.port, host_info.modbus_id),
+		}
 	}
 
 	/// Value = "SunS" (0x53756e53). Uniquely identifies this as a SunSpec MODBUS Map
