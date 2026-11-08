@@ -2,6 +2,8 @@ use std::fmt;
 
 #[derive(Debug)]
 pub enum Error {
+	/// The device reports that the requested register value or its scale factor is not implemented.
+	NotImplemented,
 	InvalidPhaseCountValue(u16),
 	Modbus(modbus::Error),
 	Io(std::io::Error),
@@ -12,6 +14,7 @@ pub enum Error {
 impl fmt::Display for Error {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
+			Self::NotImplemented => write!(f, "Register value is not implemented"),
 			Self::Modbus(e) => write!(f, "Modbus error: {e}"),
 			Self::Io(e) => write!(f, "I/O error: {e}"),
 			Self::InvalidPhaseCountValue(val) => write!(f, "Invalid phase count value: {val}"),

@@ -43,7 +43,7 @@ impl TcpClient {
 
 	/// Value = 0x0001. Uniquely identifies this as a SunSpec Common Model Block
 	pub fn model_id(&mut self) -> Result<u16, Error> {
-		Ok(self.read_register(SunspecRegister::C_SunSpec_DID)?.u16())
+		self.read_register(SunspecRegister::C_SunSpec_DID)?.u16()
 	}
 
 	/// Value Registered with SunSpec = "SolarEdge "
@@ -68,150 +68,150 @@ impl TcpClient {
 
 	/// MODBUS Unit ID
 	pub fn device_address(&mut self) -> Result<u16, Error> {
-		Ok(self.read_register(SunspecRegister::C_DeviceAddress)?.u16())
+		self.read_register(SunspecRegister::C_DeviceAddress)?.u16()
 	}
 
 	pub fn phase_count(&mut self) -> Result<PhaseCount, Error> {
-		let val = self.read_register(SunspecRegister::I_PhaseCount)?.u16();
+		let val = self.read_register(SunspecRegister::I_PhaseCount)?.u16()?;
 		PhaseCount::from_u16(val).ok_or(Error::InvalidPhaseCountValue(val))
 	}
 
 	/// Amps AC Total Current value
 	pub fn ac_current(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_Current, SunspecRegister::I_AC_Current_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Amps AC Phase A Current value
 	pub fn ac_current_a(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_CurrentA, SunspecRegister::I_AC_Current_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Amps AC Phase B Current value
 	pub fn ac_current_b(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_CurrentB, SunspecRegister::I_AC_Current_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Amps AC Phase C Current value
 	pub fn ac_current_c(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_CurrentC, SunspecRegister::I_AC_Current_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts AC Voltage Phase AB value
 	pub fn ac_voltage_ab(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VoltageAB, SunspecRegister::I_AC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts AC Voltage Phase BC value
 	pub fn ac_voltage_bc(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VoltageBC, SunspecRegister::I_AC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts AC Voltage Phase CA value
 	pub fn ac_voltage_ca(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VoltageCA, SunspecRegister::I_AC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts AC Voltage Phase A to N value
 	pub fn ac_voltage_an(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VoltageAN, SunspecRegister::I_AC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts AC Voltage Phase B to N value
 	pub fn ac_voltage_bn(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VoltageBN, SunspecRegister::I_AC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts AC Voltage Phase C to N value
 	pub fn ac_voltage_cn(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VoltageCN, SunspecRegister::I_AC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Watts AC Power value
 	pub fn ac_power(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_Power, SunspecRegister::I_AC_Power_SF)?;
-		Ok(val.i16().scaled(scale))
+		val.i16()?.scaled(scale)
 	}
 
 	/// Hertz AC Frequency value
 	pub fn ac_frequency(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_Frequency, SunspecRegister::I_AC_Frequency_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// VA Apparent Power
 	pub fn ac_va(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VA, SunspecRegister::I_AC_VA_SF)?;
-		Ok(val.i16().scaled(scale))
+		val.i16()?.scaled(scale)
 	}
 
 	/// VAR Reactive Power
 	pub fn ac_var(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_VAR2, SunspecRegister::I_AC_VAR_SF2)?;
-		Ok(val.i16().scaled(scale))
+		val.i16()?.scaled(scale)
 	}
 
 	/// Power Factor
 	pub fn power_factor(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_PF1, SunspecRegister::I_AC_PF_SF1)?;
-		Ok(val.i16().scaled(scale))
+		val.i16()?.scaled(scale)
 	}
 
 	/// WattHours AC Lifetime Energy production
 	pub fn energy_wh(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_AC_Energy_WH, SunspecRegister::I_AC_Energy_WH_SF)?;
-		Ok(val.u32().scaled(scale))
+		val.acc32().scaled(scale)
 	}
 
 	/// Amps DC Current value
 	pub fn dc_current(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_DC_Current, SunspecRegister::I_DC_Current_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Volts DC Voltage value
 	pub fn dc_voltage(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_DC_Voltage, SunspecRegister::I_DC_Voltage_SF)?;
-		Ok(val.u16().scaled(scale))
+		val.u16()?.scaled(scale)
 	}
 
 	/// Watts DC Power value
 	pub fn dc_power(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_DC_Power, SunspecRegister::I_DC_Power_SF)?;
-		Ok(val.i16().scaled(scale))
+		val.i16()?.scaled(scale)
 	}
 
 	/// Degrees C Heat Sink Temperature
 	pub fn temp_sink(&mut self) -> Result<f64, Error> {
 		let (val, scale) = self.read_register_with_scale(SunspecRegister::I_Temp_Sink, SunspecRegister::I_Temp_SF)?;
-		Ok(val.i16().scaled(scale))
+		val.i16()?.scaled(scale)
 	}
 
 	/// Operating State
 	pub fn status(&mut self) -> Result<InverterStatus, Error> {
-		let val = self.read_register(SunspecRegister::I_Status)?.u16();
+		let val = self.read_register(SunspecRegister::I_Status)?.u16()?;
 		Ok(InverterStatus::from_u16(val))
 	}
 
 	/// Vendor-defined operating state and error codes. For error description, meaning, and troubleshooting, refer to the SolarEdge
 	/// Installation Guide.
 	pub fn status_vendor(&mut self) -> Result<u16, Error> {
-		Ok(self.read_register(SunspecRegister::I_Status_Vendor)?.u16())
+		self.read_register(SunspecRegister::I_Status_Vendor)?.u16()
 	}
 
 	/// Vendor-defined operating state and error codes. For error description, meaning, and troubleshooting, refer to the SolarEdge
 	/// Installation Guide, 16MSB for controller type (3x, 8x, 18x) and 16 LSB for error code.
 	pub fn status_vendor4(&mut self) -> Result<u32, Error> {
-		Ok(self.read_register(SunspecRegister::I_Status_Vendor4)?.u32())
+		self.read_register(SunspecRegister::I_Status_Vendor4)?.u32()
 	}
 
 	#[inline(always)]
@@ -227,7 +227,7 @@ impl TcpClient {
 		&mut self,
 		register: R,
 		scale_register: RS,
-	) -> modbus::Result<(Vec<u16>, i16)> {
+	) -> Result<(Vec<u16>, i16), Error> {
 		if register.address() + register.size() == scale_register.address() {
 			let mut combined = self
 				.client
@@ -241,7 +241,7 @@ impl TcpClient {
 			let scale = combined.remove(0);
 			Ok((combined, scale as i16))
 		} else {
-			Ok((self.read_register(register)?, self.read_register(scale_register)?.i16()))
+			Ok((self.read_register(register)?, self.read_register(scale_register)?.i16()?))
 		}
 	}
 }
@@ -457,9 +457,10 @@ impl Register for SunspecRegister {
 
 trait RegisterResponse {
 	fn string(self) -> String;
-	fn u16(self) -> u16;
-	fn i16(self) -> i16;
-	fn u32(self) -> u32;
+	fn u16(self) -> Result<u16, Error>;
+	fn i16(self) -> Result<i16, Error>;
+	fn u32(self) -> Result<u32, Error>;
+	fn acc32(self) -> u32;
 }
 
 impl RegisterResponse for Vec<u16> {
@@ -472,40 +473,139 @@ impl RegisterResponse for Vec<u16> {
 			.collect()
 	}
 
-	fn u16(self) -> u16 {
-		self[0]
+	fn u16(self) -> Result<u16, Error> {
+		match self[0] {
+			u16::MAX => Err(Error::NotImplemented),
+			value => Ok(value),
+		}
 	}
 
-	fn i16(self) -> i16 {
-		self[0] as i16
+	fn i16(self) -> Result<i16, Error> {
+		match self[0] as i16 {
+			i16::MIN => Err(Error::NotImplemented),
+			value => Ok(value),
+		}
 	}
 
-	fn u32(self) -> u32 {
+	fn u32(self) -> Result<u32, Error> {
+		match self.acc32() {
+			u32::MAX => Err(Error::NotImplemented),
+			value => Ok(value),
+		}
+	}
+
+	fn acc32(self) -> u32 {
+		// Accumulators permit the full u32 range, including 0 and u32::MAX.
 		((self[0] as u32) << 16) | self[1] as u32
 	}
 }
 
 trait Scaled {
-	fn scaled(self, scale: i16) -> f64;
+	fn scaled(self, scale: i16) -> Result<f64, Error>;
 }
 
-impl Scaled for i16 {
-	fn scaled(self, scale: i16) -> f64 {
-		let value = self as f64;
-		value * 10f64.powi(i32::from(scale))
+impl<T: Into<f64>> Scaled for T {
+	fn scaled(self, scale: i16) -> Result<f64, Error> {
+		if scale == i16::MIN {
+			return Err(Error::NotImplemented);
+		}
+		Ok(self.into() * 10f64.powi(i32::from(scale)))
 	}
 }
 
-impl Scaled for u16 {
-	fn scaled(self, scale: i16) -> f64 {
-		let value = self as f64;
-		value * 10f64.powi(i32::from(scale))
-	}
-}
+#[cfg(test)]
+mod tests {
+	use std::io::{Read, Write};
+	use std::net::TcpListener;
+	use std::thread;
+	use std::time::Duration;
 
-impl Scaled for u32 {
-	fn scaled(self, scale: i16) -> f64 {
-		let value = self as f64;
-		value * 10f64.powi(i32::from(scale))
+	use super::*;
+
+	#[test]
+	fn numeric_decoding_rejects_only_the_type_specific_sentinel() {
+		assert!(matches!(vec![0xffff].u16(), Err(Error::NotImplemented)));
+		assert_eq!(vec![0x8000].u16().unwrap(), 32768);
+		assert_eq!(vec![0xfffe].u16().unwrap(), 65534);
+		assert!(matches!(vec![0x8000].i16(), Err(Error::NotImplemented)));
+		assert_eq!(vec![0x8001].i16().unwrap(), -32767);
+		assert_eq!(vec![0xffff].i16().unwrap(), -1);
+		assert!(matches!(vec![0xffff, 0xffff].u32(), Err(Error::NotImplemented)));
+		assert_eq!(vec![0xffff, 0xfffe].u32().unwrap(), u32::MAX - 1);
+		assert_eq!(vec![0, 0].acc32(), 0);
+		assert_eq!(vec![0xffff, 0xffff].acc32(), u32::MAX);
+	}
+
+	#[test]
+	fn scaling_rejects_unavailable_scale_and_preserves_signed_scales() {
+		assert!(matches!(1u16.scaled(i16::MIN), Err(Error::NotImplemented)));
+		assert!(matches!((-1i16).scaled(i16::MIN), Err(Error::NotImplemented)));
+		assert!(matches!(0u32.scaled(i16::MIN), Err(Error::NotImplemented)));
+		assert_eq!(123u16.scaled(-1).unwrap(), 12.3);
+		assert_eq!((-123i16).scaled(-1).unwrap(), -12.3);
+		assert_eq!(123u32.scaled(2).unwrap(), 12300.0);
+	}
+
+	fn mock_client(responses: Vec<(u16, Vec<u16>)>) -> (TcpClient, thread::JoinHandle<()>) {
+		let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+		let port = listener.local_addr().unwrap().port();
+		let server = thread::spawn(move || {
+			let (mut stream, _) = listener.accept().unwrap();
+			stream.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+			stream.set_write_timeout(Some(Duration::from_secs(5))).unwrap();
+			for (address, values) in responses {
+				let mut request = [0u8; 12];
+				stream.read_exact(&mut request).unwrap();
+				assert_eq!(request[7], 3); // Read holding registers.
+				assert_eq!(u16::from_be_bytes([request[8], request[9]]), address);
+				assert_eq!(usize::from(u16::from_be_bytes([request[10], request[11]])), values.len());
+				let byte_count = (values.len() * 2) as u8;
+				let mut response = request[..4].to_vec();
+				response.extend_from_slice(&(u16::from(byte_count) + 3).to_be_bytes());
+				response.extend_from_slice(&[request[6], 3, byte_count]);
+				for value in values {
+					response.extend_from_slice(&value.to_be_bytes());
+				}
+				stream.write_all(&response).unwrap();
+			}
+		});
+		(TcpClient::new("127.0.0.1", port, 1).unwrap(), server)
+	}
+
+	#[test]
+	fn getters_report_unavailable_values_and_scales() {
+		let (mut client, server) = mock_client(vec![
+			(40002, vec![0xffff]),         // Common model ID.
+			(40069, vec![0xffff]),         // Inverter model ID.
+			(40107, vec![0xffff]),         // Status.
+			(40108, vec![0xffff]),         // Vendor status.
+			(40119, vec![0xffff, 0xffff]), // 32-bit vendor status.
+			(40074, vec![0xffff, 0]),      // Unsigned measurement with adjacent scale.
+			(40083, vec![0x8000, 0]),      // Signed measurement with adjacent scale.
+			(40083, vec![123, 0x8000]),    // Unavailable adjacent scale.
+			(40071, vec![123]),            // Measurement and scale in separate requests.
+			(40075, vec![0x8000]),
+			(40103, vec![0x8000]), // Unavailable measurement with separate valid scale.
+			(40106, vec![0]),
+			(40083, vec![(-123i16) as u16, (-1i16) as u16]),
+			(40093, vec![0, 0, 0]), // Zero and maximum are valid accumulator values.
+			(40093, vec![0xffff, 0xffff, 0]),
+			(40093, vec![0, 1, 0x8000]), // Accumulator with unavailable scale.
+		]);
+		assert!(matches!(client.model_id(), Err(Error::NotImplemented)));
+		assert!(matches!(client.phase_count(), Err(Error::NotImplemented)));
+		assert!(matches!(client.status(), Err(Error::NotImplemented)));
+		assert!(matches!(client.status_vendor(), Err(Error::NotImplemented)));
+		assert!(matches!(client.status_vendor4(), Err(Error::NotImplemented)));
+		assert!(matches!(client.ac_current_c(), Err(Error::NotImplemented)));
+		assert!(matches!(client.ac_power(), Err(Error::NotImplemented)));
+		assert!(matches!(client.ac_power(), Err(Error::NotImplemented)));
+		assert!(matches!(client.ac_current(), Err(Error::NotImplemented)));
+		assert!(matches!(client.temp_sink(), Err(Error::NotImplemented)));
+		assert_eq!(client.ac_power().unwrap(), -12.3);
+		assert_eq!(client.energy_wh().unwrap(), 0.0);
+		assert_eq!(client.energy_wh().unwrap(), f64::from(u32::MAX));
+		assert!(matches!(client.energy_wh(), Err(Error::NotImplemented)));
+		server.join().unwrap();
 	}
 }
