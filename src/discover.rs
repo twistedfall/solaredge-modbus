@@ -1,11 +1,12 @@
 use std::borrow::Cow;
-use std::collections::HashSet;
+use std::collections::hash_map::Entry;
+use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
 use std::pin::pin;
 
 use async_timer::{Expired, Timed};
 use log::{error, trace};
-use mdns_sd::{ServiceDaemon, ServiceEvent};
+use mdns_sd::{ResolvedService, ServiceDaemon, ServiceEvent};
 
 use crate::Error;
 
@@ -30,6 +31,36 @@ impl SolaredgeHostInfo {
 	}
 }
 
+fn record_host(hosts: &mut HashMap<String, SolaredgeHostInfo>, info: ResolvedService) {
+	let modbus_id = info.get_property_val_str("MODBUS_ID");
+	let Some(modbus_id) = modbus_id.and_then(|s| s.parse::<u8>().ok()) else {
+		error!("Failed to find or parse modbus ID: {modbus_id:?}");
+		return;
+	};
+	let addresses = info.addresses.into_iter().map(|address| address.to_ip_addr());
+	// DNS service names are case-insensitive. Repeated resolutions can come from different interfaces.
+	match hosts.entry(info.fullname.to_ascii_lowercase()) {
+		Entry::Vacant(entry) => {
+			entry.insert(SolaredgeHostInfo {
+				hostname: info.host,
+				addresses: addresses.collect(),
+				port: info.port,
+				modbus_id,
+			});
+		}
+		Entry::Occupied(mut entry) => {
+			let host = entry.get_mut();
+			if !host.hostname.eq_ignore_ascii_case(&info.host) {
+				host.addresses.clear();
+			}
+			host.hostname = info.host;
+			host.addresses.extend(addresses);
+			host.port = info.port;
+			host.modbus_id = modbus_id;
+		}
+	}
+}
+
 /// Perform mDNS discovery and return the Solaredge Inverters found on the local network.
 ///
 /// Due to the unpredictable nature of mDNS, you need to supply the `timeout` argument to specify how long should the call wait
@@ -47,24 +78,14 @@ pub async fn discover_with_mdns(timeout: std::time::Duration, max_hosts: usize) 
 	};
 	let mdns = ServiceDaemon::new()?;
 	let receiver = mdns.browse(SOLAREDGE_INVERTER_SERVICE_TYPE)?;
-	let mut out = Vec::with_capacity(1);
+	let mut out = HashMap::new();
 	{
 		let discover = async {
 			while let Ok(event) = receiver.recv_async().await {
 				if let ServiceEvent::ServiceResolved(info) = event {
-					let modbus_id = info.get_property_val_str("MODBUS_ID");
-					if let Some(modbus_id) = modbus_id.and_then(|s| s.parse::<u8>().ok()) {
-						out.push(SolaredgeHostInfo {
-							hostname: info.host,
-							addresses: info.addresses.into_iter().map(|addr| addr.to_ip_addr()).collect(),
-							port: info.port,
-							modbus_id,
-						});
-						if out.len() >= max_hosts {
-							break;
-						}
-					} else {
-						error!("Failed to find or parse modbus ID: {modbus_id:?}");
+					record_host(&mut out, *info);
+					if out.len() >= max_hosts {
+						break;
 					}
 				}
 			}
@@ -77,5 +98,5 @@ pub async fn discover_with_mdns(timeout: std::time::Duration, max_hosts: usize) 
 	}
 	trace!("Found {} host(s) via mDNS Discovery", out.len());
 	mdns.shutdown()?;
-	Ok(out)
+	Ok(out.into_values().collect())
 }
